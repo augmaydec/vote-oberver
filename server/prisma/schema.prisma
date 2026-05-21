@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model VotingSlot {
+  id             Int            @id @default(autoincrement())
+  type           SlotType
+  region         String
+  stationName    String
+  buildingName   String?
+  stationAddress String?
+  date           String
+  timeSlot       String
+  capacity       Int            @default(1)
+  registrations  Registration[]
+  createdAt      DateTime       @default(now())
+
+  @@unique([stationName, date, timeSlot])
+}
+
+model Registration {
+  id          Int        @id @default(autoincrement())
+  name        String
+  birthDate   String
+  gender      String?
+  phone       String
+  addressDong String?
+  address     String?
+  bankAccount String?
+  isMember    Boolean    @default(false)
+  isSupporter Boolean    @default(false)
+  isConfirmed Boolean    @default(false)
+  slot        VotingSlot @relation(fields: [slotId], references: [id])
+  slotId      Int
+  createdAt   DateTime   @default(now())
+}
+
+enum SlotType {
+  ELECTION_DAY
+  PRE_VOTE
+}
