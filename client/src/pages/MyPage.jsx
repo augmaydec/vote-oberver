@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { sendVerifyCode, checkVerifyCode, lookupMyRegistration, updateMyRegistration } from '../api';
+import { sendVerifyCode, checkVerifyCode, lookupMyRegistration, updateMyRegistration, deleteMyRegistration } from '../api';
 
 function PhoneVerify({ onVerified }) {
   const [phone, setPhone] = useState('');
@@ -110,8 +110,9 @@ function PhoneVerify({ onVerified }) {
   );
 }
 
-function RegistrationCard({ reg, verifyToken, onUpdated }) {
+function RegistrationCard({ reg, verifyToken, onUpdated, onDeleted }) {
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({
     gender: reg.gender || '',
     addressDong: reg.addressDong || '',
@@ -142,6 +143,18 @@ function RegistrationCard({ reg, verifyToken, onUpdated }) {
     }
   }
 
+  async function handleDelete() {
+    if (!confirm(`'${reg.slot.stationName} ${reg.slot.date} ${reg.slot.timeSlot}' 신청을 취소하시겠습니까?\n취소 후 해당 슬롯이 다시 열리며 되돌릴 수 없습니다.`)) return;
+    setDeleting(true);
+    try {
+      await deleteMyRegistration(reg.id, verifyToken);
+      onDeleted(reg.id);
+    } catch (err) {
+      alert(err.message);
+      setDeleting(false);
+    }
+  }
+
   const timeLabel = reg.slot.timeSlot === '오전' ? '오전 06:00~12:00' : '오후 12:00~18:00';
 
   return (
@@ -156,10 +169,16 @@ function RegistrationCard({ reg, verifyToken, onUpdated }) {
           <p className="text-sm font-semibold text-primary mt-1">{reg.slot.date} {timeLabel}</p>
         </div>
         {!reg.isConfirmed && !editing && (
-          <button onClick={() => setEditing(true)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:border-primary hover:text-primary transition">
-            수정
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setEditing(true)}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:border-primary hover:text-primary transition">
+              수정
+            </button>
+            <button onClick={handleDelete} disabled={deleting}
+              className="px-3 py-1.5 border border-red-300 rounded-lg text-xs text-red-500 hover:bg-red-50 disabled:opacity-50 transition">
+              {deleting ? '취소 중...' : '신청 취소'}
+            </button>
+          </div>
         )}
       </div>
 
@@ -241,6 +260,10 @@ export default function MyPage() {
     setRegistrations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
   }
 
+  function handleDeleted(id) {
+    setRegistrations((prev) => prev.filter((r) => r.id !== id));
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary text-white py-5 px-4 shadow-md">
@@ -264,7 +287,7 @@ export default function MyPage() {
               </div>
             ) : (
               registrations.map((reg) => (
-                <RegistrationCard key={reg.id} reg={reg} verifyToken={verifyToken} onUpdated={handleUpdated} />
+                <RegistrationCard key={reg.id} reg={reg} verifyToken={verifyToken} onUpdated={handleUpdated} onDeleted={handleDeleted} />
               ))
             )}
           </>

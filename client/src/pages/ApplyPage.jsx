@@ -180,6 +180,7 @@ export default function ApplyPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     fetchSlots()
@@ -209,9 +210,14 @@ export default function ApplyPage() {
     setForm((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
   }
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault();
     if (!verifyToken) { alert('연락처 인증을 완료해 주세요.'); return; }
+    setShowConfirm(true);
+  }
+
+  async function handleConfirmedSubmit() {
+    setShowConfirm(false);
     setSubmitting(true);
     try {
       await submitApply({ slotId: selectedSlotId, ...form, verifyToken });
@@ -411,20 +417,20 @@ export default function ApplyPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">읍면동</label>
-                <input name="addressDong" value={form.addressDong} onChange={handleFormChange}
+                <label className="block text-sm font-medium text-gray-600 mb-1">읍면동 <span className="text-primary">*</span></label>
+                <input name="addressDong" value={form.addressDong} onChange={handleFormChange} required
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" placeholder="예: 비전동" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">주소</label>
-                <input name="address" value={form.address} onChange={handleFormChange}
+                <label className="block text-sm font-medium text-gray-600 mb-1">주소 <span className="text-primary">*</span></label>
+                <input name="address" value={form.address} onChange={handleFormChange} required
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" placeholder="상세 주소" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">계좌번호 <span className="text-xs text-gray-400">(활동비 지급용)</span></label>
-                <input name="bankAccount" value={form.bankAccount} onChange={handleFormChange}
+                <label className="block text-sm font-medium text-gray-600 mb-1">계좌번호 <span className="text-primary">*</span> <span className="text-xs text-gray-400">(활동비 지급용)</span></label>
+                <input name="bankAccount" value={form.bankAccount} onChange={handleFormChange} required
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" placeholder="은행명 계좌번호" />
               </div>
 
@@ -450,6 +456,38 @@ export default function ApplyPage() {
               </button>
             </form>
           </section>
+        )}
+
+        {/* 확인 모달 */}
+        {showConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
+              <h3 className="text-lg font-bold mb-2 text-gray-800">신청 전 최종 확인</h3>
+              <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-3 mb-4 text-sm text-yellow-800 space-y-1">
+                <p className="font-bold">아래 내용을 반드시 확인해 주세요.</p>
+                <p>• 입력하신 모든 정보가 정확한지 확인했습니까?</p>
+                <p>• 이름, 생년월일은 신분증과 일치해야 합니다.</p>
+                <p>• 계좌번호는 활동비 지급에 사용됩니다.</p>
+                <p>• 부정확한 정보로 인한 불이익은 책임지지 않습니다.</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 text-sm space-y-1 mb-4">
+                <div><span className="text-gray-500">이름:</span> <span className="font-semibold">{form.name}</span></div>
+                <div><span className="text-gray-500">연락처:</span> {form.phone}</div>
+                <div><span className="text-gray-500">투표소:</span> {selectedSlotInfo?.stationName}</div>
+                <div><span className="text-gray-500">일시:</span> {selectedSlotInfo?.date} {selectedSlotInfo?.timeSlot === '오전' ? '오전 06:00~12:00' : '오후 12:00~18:00'}</div>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setShowConfirm(false)}
+                  className="flex-1 py-3 border border-gray-300 rounded-xl text-gray-600 font-medium hover:bg-gray-50">
+                  다시 확인
+                </button>
+                <button onClick={handleConfirmedSubmit}
+                  className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark">
+                  정보 확인 완료, 신청하기
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         <div className="text-center text-xs text-gray-400 pb-8">

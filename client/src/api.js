@@ -61,6 +61,16 @@ export async function updateMyRegistration(id, data, verifyToken) {
   return json;
 }
 
+export async function deleteMyRegistration(id, verifyToken) {
+  const res = await fetch(`${BASE}/my/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-verify-token': verifyToken },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || '취소에 실패했습니다.');
+  return json;
+}
+
 export async function adminLogin(password) {
   const res = await fetch(`${BASE}/admin/login`, {
     method: 'POST',

@@ -1,6 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
-const { sendRegistrationSMS } = require('../lib/sms');
+const { sendOtpSMS } = require('../lib/sms');
 const { otpStore, verifiedTokens } = require('../lib/store');
 
 const router = express.Router();
@@ -17,7 +17,6 @@ router.post('/send', async (req, res) => {
   const cleaned = phone.replace(/[^0-9]/g, '');
   if (cleaned.length < 10) return res.status(400).json({ error: '올바른 연락처를 입력해 주세요.' });
 
-  // 60초 재발송 제한
   const existing = otpStore.get(cleaned);
   if (existing && Date.now() - existing.sentAt < 60 * 1000) {
     return res.status(429).json({ error: '60초 후 다시 요청해 주세요.' });
@@ -27,11 +26,12 @@ router.post('/send', async (req, res) => {
   otpStore.set(cleaned, { code, expiresAt: Date.now() + 5 * 60 * 1000, sentAt: Date.now() });
 
   try {
-    await sendRegistrationSMS(cleaned, null, code);
+    await sendOtpSMS(cleaned, code);
     res.json({ success: true });
-  } catch {
-    // Solapi 미설정 시에도 응답은 성공 (콘솔에 출력됨)
-    res.json({ success: true });
+  } catch (err) {
+    console.error('[OTP] 발송 실패:', err.message, err.response?.data || '');
+    // OTP가 저장은 됐으므로 실패 알림 (Solapi 설정 문제일 경우)
+    res.status(500).json({ error: `문자 발송에 실패했습니다. (${err.message})` });
   }
 });
 

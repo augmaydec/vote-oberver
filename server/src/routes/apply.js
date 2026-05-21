@@ -6,15 +6,13 @@ const { verifiedTokens } = require('../lib/store');
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// POST /api/apply
 router.post('/', async (req, res) => {
   const { slotId, name, birthDate, gender, phone, addressDong, address, bankAccount, isMember, isSupporter, verifyToken } = req.body;
 
-  if (!slotId || !name || !phone || !birthDate) {
+  if (!slotId || !name || !phone || !birthDate || !addressDong || !address || !bankAccount) {
     return res.status(400).json({ error: '필수 항목을 모두 입력해 주세요.' });
   }
 
-  // 전화번호 인증 확인
   const tokenEntry = verifiedTokens.get(verifyToken);
   const cleanedPhone = phone.replace(/[^0-9]/g, '');
   if (!tokenEntry || Date.now() > tokenEntry.expiresAt || tokenEntry.phone !== cleanedPhone) {
@@ -38,9 +36,9 @@ router.post('/', async (req, res) => {
           birthDate: birthDate.trim(),
           gender: gender || null,
           phone: phone.trim(),
-          addressDong: addressDong || null,
-          address: address || null,
-          bankAccount: bankAccount || null,
+          addressDong: addressDong.trim(),
+          address: address.trim(),
+          bankAccount: bankAccount.trim(),
           isMember: Boolean(isMember),
           isSupporter: Boolean(isSupporter),
         },
@@ -48,10 +46,8 @@ router.post('/', async (req, res) => {
       });
     });
 
-    // 인증 토큰 소비 (재사용 방지)
     verifiedTokens.delete(verifyToken);
 
-    // SMS 발송 (비동기)
     sendRegistrationSMS(phone, {
       name,
       stationName: result.slot.stationName,
