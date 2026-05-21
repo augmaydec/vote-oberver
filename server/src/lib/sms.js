@@ -41,10 +41,21 @@ async function sendOtpSMS(phone, code) {
 }
 
 async function sendRegistrationSMS(phone, data) {
-  const { name, stationName, buildingName, date, timeSlot } = data;
-  const timeLabel = timeSlot === '오전' ? '06:00~12:00' : '12:00~18:00';
+  const { name, stationName, buildingName, stationAddress, date, timeSlot } = data;
+  const timeLabel = timeSlot === '오전' ? '오전 06:00~12:00' : '오후 12:00~18:00';
   const siteUrl = process.env.SITE_URL || 'https://vote-oberver-production.up.railway.app';
-  const text = `[진보당 평택]\n${name}님, 투표참관인 신청 완료!\n\n투표소: ${stationName}\n장소: ${buildingName || ''}\n일시: ${date} ${timeSlot}(${timeLabel})\n\n확인/수정: ${siteUrl}/my`;
+  const lines = [
+    `[진보당 평택]`,
+    `${name}님, 투표참관인 신청이 완료되었습니다.`,
+    ``,
+    `▶ 투표소: ${stationName}`,
+    buildingName ? `▶ 건물명: ${buildingName}` : null,
+    stationAddress ? `▶ 주소: ${stationAddress}` : null,
+    `▶ 일시: ${date} ${timeLabel}`,
+    ``,
+    `신청 확인/수정: ${siteUrl}/my`,
+  ].filter((l) => l !== null).join('\n');
+  const text = lines;
   try {
     await sendSMS(phone, text);
   } catch (err) {

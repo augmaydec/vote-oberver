@@ -52,6 +52,7 @@ router.post('/', async (req, res) => {
       name,
       stationName: result.slot.stationName,
       buildingName: result.slot.buildingName,
+      stationAddress: result.slot.stationAddress,
       date: result.slot.date,
       timeSlot: result.slot.timeSlot,
     });
