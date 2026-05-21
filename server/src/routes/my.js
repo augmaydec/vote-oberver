@@ -16,7 +16,7 @@ function getVerifiedPhone(req) {
 function phoneMatch(a, b) {
   const ca = a.replace(/[^0-9]/g, '');
   const cb = b.replace(/[^0-9]/g, '');
-  return ca === cb || ca.includes(cb) || cb.includes(ca);
+  return ca === cb;
 }
 
 // POST /api/my/lookup

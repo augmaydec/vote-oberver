@@ -12,7 +12,16 @@ const myRouter = require('./routes/my');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['https://vote-oberver-production.up.railway.app'];
+app.use(cors({
+  origin: (origin, cb) => {
+    // origin이 없으면 같은 도메인 요청(서버 직접) — 허용
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
+  },
+}));
 app.use(express.json());
 
 app.use('/api/slots', slotsRouter);

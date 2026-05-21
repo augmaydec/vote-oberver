@@ -45,6 +45,11 @@ router.post('/check', (req, res) => {
 
   if (!entry) return res.status(400).json({ error: '인증번호를 먼저 요청해 주세요.' });
   if (Date.now() > entry.expiresAt) return res.status(400).json({ error: '인증번호가 만료되었습니다. 다시 요청해 주세요.' });
+  entry.attempts = (entry.attempts || 0) + 1;
+  if (entry.attempts > 5) {
+    otpStore.delete(cleaned);
+    return res.status(429).json({ error: '시도 횟수를 초과했습니다. 인증번호를 다시 요청해 주세요.' });
+  }
   if (entry.code !== code.trim()) return res.status(400).json({ error: '인증번호가 올바르지 않습니다.' });
 
   otpStore.delete(cleaned);

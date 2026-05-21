@@ -3,16 +3,29 @@ const jwt = require('jsonwebtoken');
 const XLSX = require('xlsx');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware, JWT_SECRET } = require('../middleware/auth');
+const { loginAttempts } = require('../lib/store');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 // POST /api/admin/login
 router.post('/login', (req, res) => {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+
+  if (entry && entry.count >= 10 && now < entry.resetAt) {
+    return res.status(429).json({ error: '잠시 후 다시 시도해 주세요.' });
+  }
+
   const { password } = req.body;
   if (password !== process.env.ADMIN_PASSWORD) {
+    const prev = loginAttempts.get(ip) || { count: 0, resetAt: now + 15 * 60 * 1000 };
+    loginAttempts.set(ip, { count: prev.count + 1, resetAt: prev.resetAt });
     return res.status(401).json({ error: '비밀번호가 올바르지 않습니다.' });
   }
+
+  loginAttempts.delete(ip);
   const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '12h' });
   res.json({ token });
 });
