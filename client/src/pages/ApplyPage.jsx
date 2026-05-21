@@ -262,7 +262,7 @@ export default function ApplyPage() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary text-white py-5 px-4 shadow-md">
         <div className="max-w-2xl mx-auto">
-          <div className="text-xs font-semibold tracking-widest mb-1 opacity-80">진보당 평택시당</div>
+          <div className="text-xs font-semibold tracking-widest mb-1 opacity-80">진보당</div>
           <h1 className="text-2xl font-bold">6.3 지방선거 투표참관인 신청</h1>
           <p className="text-sm mt-1 opacity-90">갑병 지역 선착순 모집</p>
         </div>

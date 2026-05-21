@@ -37,7 +37,7 @@ async function sendSMS(to, text) {
 }
 
 async function sendOtpSMS(phone, code) {
-  await sendSMS(phone, `[진보당 평택]\n인증번호: ${code}\n5분 이내에 입력해 주세요.`);
+  await sendSMS(phone, `[진보당]\n인증번호: ${code}\n5분 이내에 입력해 주세요.`);
 }
 
 async function sendRegistrationSMS(phone, data) {
@@ -45,7 +45,7 @@ async function sendRegistrationSMS(phone, data) {
   const timeLabel = timeSlot === '오전' ? '오전 06:00~12:00' : '오후 12:00~18:00';
   const siteUrl = process.env.SITE_URL || 'https://vote-oberver-production.up.railway.app';
   const lines = [
-    `[진보당 평택]`,
+    `[진보당]`,
     `${name}님, 투표참관인 신청이 완료되었습니다.`,
     ``,
     `▶ 투표소: ${stationName}`,

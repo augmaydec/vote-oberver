@@ -268,7 +268,7 @@ export default function MyPage() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary text-white py-5 px-4 shadow-md">
         <div className="max-w-2xl mx-auto">
-          <div className="text-xs opacity-80 mb-1">진보당 평택시당</div>
+          <div className="text-xs opacity-80 mb-1">진보당</div>
           <h1 className="text-xl font-bold">내 신청 확인 · 수정</h1>
         </div>
       </header>
