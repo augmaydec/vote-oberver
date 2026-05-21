@@ -29,7 +29,9 @@ async function sendSMS(to, text) {
   console.log(`[SMS] 발송 시도: to=${cleaned} from=${sender}`);
   // 에러를 삼키지 않고 상위로 전파
   const result = await service.sendOne({
-    message: { to: cleaned, from: sender, text },
+    to: cleaned,
+    from: sender,
+    text,
   });
   console.log(`[SMS] 발송 완료:`, JSON.stringify(result));
 }
