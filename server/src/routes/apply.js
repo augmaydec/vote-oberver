@@ -1,16 +1,24 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { sendRegistrationSMS } = require('../lib/sms');
+const { verifiedTokens } = require('../lib/store');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// POST /api/apply - 참관인 신청
+// POST /api/apply
 router.post('/', async (req, res) => {
-  const { slotId, name, birthDate, gender, phone, addressDong, address, bankAccount, isMember, isSupporter } = req.body;
+  const { slotId, name, birthDate, gender, phone, addressDong, address, bankAccount, isMember, isSupporter, verifyToken } = req.body;
 
   if (!slotId || !name || !phone || !birthDate) {
     return res.status(400).json({ error: '필수 항목을 모두 입력해 주세요.' });
+  }
+
+  // 전화번호 인증 확인
+  const tokenEntry = verifiedTokens.get(verifyToken);
+  const cleanedPhone = phone.replace(/[^0-9]/g, '');
+  if (!tokenEntry || Date.now() > tokenEntry.expiresAt || tokenEntry.phone !== cleanedPhone) {
+    return res.status(400).json({ error: '연락처 인증이 필요합니다.' });
   }
 
   try {
@@ -23,7 +31,7 @@ router.post('/', async (req, res) => {
       if (!slot) throw new Error('존재하지 않는 투표소입니다.');
       if (slot._count.registrations >= slot.capacity) throw new Error('마감된 시간대입니다.');
 
-      const registration = await tx.registration.create({
+      return await tx.registration.create({
         data: {
           slotId: slot.id,
           name: name.trim(),
@@ -38,11 +46,12 @@ router.post('/', async (req, res) => {
         },
         include: { slot: true },
       });
-
-      return registration;
     });
 
-    // SMS 발송 (비동기 — 실패해도 신청은 완료)
+    // 인증 토큰 소비 (재사용 방지)
+    verifiedTokens.delete(verifyToken);
+
+    // SMS 발송 (비동기)
     sendRegistrationSMS(phone, {
       name,
       stationName: result.slot.stationName,

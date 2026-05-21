@@ -6,6 +6,8 @@ const path = require('path');
 const slotsRouter = require('./routes/slots');
 const applyRouter = require('./routes/apply');
 const adminRouter = require('./routes/admin');
+const verifyRouter = require('./routes/verify');
+const myRouter = require('./routes/my');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,10 +15,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// API routes
 app.use('/api/slots', slotsRouter);
 app.use('/api/apply', applyRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/verify', verifyRouter);
+app.use('/api/my', myRouter);
 
 // Serve React build
 const distPath = path.join(__dirname, '../../client/dist');
