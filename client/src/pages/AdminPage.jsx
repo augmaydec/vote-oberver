@@ -88,7 +88,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm">
           <div className="text-center mb-6">
             <div className="text-primary text-2xl font-bold mb-1">관리자</div>
-            <div className="text-gray-500 text-sm">진보당 평택시당 투표참관인 관리</div>
+            <div className="text-gray-500 text-sm">진보당 투표참관인 관리</div>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <input
@@ -141,7 +141,7 @@ export default function AdminPage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
             <div className="font-bold text-lg">투표참관인 관리</div>
-            <div className="text-xs opacity-80">진보당 평택시당</div>
+            <div className="text-xs opacity-80">진보당</div>
           </div>
           <button onClick={handleLogout} className="text-sm bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition">
             로그아웃

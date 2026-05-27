@@ -29,6 +29,11 @@ router.post('/', async (req, res) => {
       if (!slot) throw new Error('존재하지 않는 투표소입니다.');
       if (slot._count.registrations >= slot.capacity) throw new Error('마감된 시간대입니다.');
 
+      const existing = await tx.registration.findFirst({
+        where: { phone: phone.trim() },
+      });
+      if (existing) throw new Error('이미 신청하셨습니다.');
+
       return await tx.registration.create({
         data: {
           slotId: slot.id,
@@ -59,7 +64,7 @@ router.post('/', async (req, res) => {
 
     res.json({ success: true, message: '신청이 완료되었습니다.', id: result.id });
   } catch (err) {
-    if (err.message === '마감된 시간대입니다.' || err.message === '존재하지 않는 투표소입니다.') {
+    if (err.message === '마감된 시간대입니다.' || err.message === '존재하지 않는 투표소입니다.' || err.message === '이미 신청하셨습니다.') {
       return res.status(409).json({ error: err.message });
     }
     console.error(err);

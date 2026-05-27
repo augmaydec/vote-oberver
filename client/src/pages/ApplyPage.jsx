@@ -160,6 +160,8 @@ function PhoneVerify({ phone, setPhone, onVerified }) {
   );
 }
 
+const REGISTRATION_CLOSED = true;
+
 export default function ApplyPage() {
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -281,7 +283,14 @@ export default function ApplyPage() {
           <p>• 사전투표: 5월 29일(목), 30일(금) / 선거일: 6월 3일(화)</p>
         </div>
 
-        {/* STEP 1 */}
+        {REGISTRATION_CLOSED && (
+          <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-5 text-center text-yellow-800">
+            <p className="font-bold text-base">현재는 접수할 수 없는 상태입니다.</p>
+          </div>
+        )}
+
+        {!REGISTRATION_CLOSED && (
+        <>{/* STEP 1 */}
         <section className="bg-white rounded-2xl shadow-sm p-5">
           <h2 className="text-base font-bold mb-3 text-gray-700"><span className="text-primary mr-1">1</span> 참관 일정 선택</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -457,6 +466,7 @@ export default function ApplyPage() {
             </form>
           </section>
         )}
+        </>)}
 
         {/* 확인 모달 */}
         {showConfirm && (
